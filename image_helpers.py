@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageOps
 
 WHITE = (255, 255, 255)
 
@@ -12,3 +12,7 @@ def loadSizedImage(filename, size):
     result.paste(img, top_left)
     return result
 
+def processImage(img):
+    # img = ImageOps.equalize(img)
+    img = ImageOps.autocontrast(img)
+    return img
