@@ -75,8 +75,8 @@ def processAllImages(input_dir, output_dir, process, max_per_dir=9999):
         except:
             print("problem with", filename, "(didn't save)")
 
-def loadImagesForSciKit(input_dir, process):
-    all_images = loadImagesRecursive(input_dir)
+def loadImagesForSciKit(input_dir, process, max_per_dir=9999):
+    all_images = loadImagesRecursive(input_dir, max_per_dir)
     output_data = []
 
     for image in all_images:
@@ -87,3 +87,21 @@ def loadImagesForSciKit(input_dir, process):
         #filename = output_dir + '/' + str(image_number) + '.jpg'
         dirname = image.parent.name  # class
         print("Image class ", dirname)
+
+def loadImagesForKeras(input_dir, process, max_per_dir=9999):
+    all_images = loadImagesRecursive(input_dir, max_per_dir)
+    output_data = []
+    classes = []
+
+    for image in all_images:
+        print("from:", image.parent.name + '/' + image.name)
+        img = loadImage128x128(image)
+        # print("loaded:", img)
+        image_data = process(img)
+        #filename = output_dir + '/' + str(image_number) + '.jpg'
+        dirname = image.parent.name  # class
+        print("Image class ", dirname)
+        output_data.append(image_data)
+        classes.append(dirname)
+
+    return output_data, classes
