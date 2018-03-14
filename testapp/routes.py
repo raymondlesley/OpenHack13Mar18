@@ -30,16 +30,21 @@ def postValue(tag, default):
 		return default
 
 
-from testapp import trainer
+from testapp import trainer, classifier
 CRLF = "" + chr(10) + chr(13)
 
 @app.route('/train', methods=['GET', 'POST'])
 def train():
 	print("train()")
-	imageURL = postValue('imageURL', None)
 	numImages = int(postValue('numImages', 9999))
-	print("imageURL=" + imageURL)
 	print("numImages=" + str(numImages))
-	print("Image URL = " + imageURL)
-	output = trainer.trainer(imageURL, numImages)
+	output = trainer.trainer(numImages)
+	return output
+
+@app.route('/classify', methods=['GET', 'POST'])
+def classify():
+	print("classify()")
+	imageURL = postValue('imageURL', None)
+	print("imageURL=" + imageURL)
+	output = classifier.classifier(imageURL)
 	return output

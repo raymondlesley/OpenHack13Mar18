@@ -33,25 +33,33 @@ def loadImagesForSciKit(input_dir, process, max_per_dir=9999):
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 
-def trainer(numImages):
-	print("Loading images")
-	d, c = loadImagesForSciKit('../gear_images', dummyProcess, numImages)
-	print("Done")
+def classifier(imageURL):
 
-	num_images = len(d)
-	num_pixels = len(d[0])
-	print("got", num_images, "x", num_pixels)
-	values = npy.reshape(d, [num_images*num_pixels])
-	print("data range", max(values), "to", min(values))
+	clf = joblib.load("gear_model.pkl")
 
-	X_train, X_test, y_train, y_test = train_test_split(d, c, test_size=0.33, random_state=42)
+	#load Image from URL
+	import urllib
+	from PIL import Image
+	from io import BytesIO
+	print("Loading image from " + imageURL)
+	import urllib.request
+	with urllib.request.urlopen(imageURL) as response:
+		r = response.read()	# img_file = urllib.urlopen(imageURL)
+		im = BytesIO(r)
+		resized_image = sizeImage(Image.open(im), 128, 128)
 
-	from sklearn.ensemble import RandomForestClassifier
-	clf = RandomForestClassifier()
+	print(resized_image.size)
+	data = dummyProcess(resized_image)
+	print(len(data))
+	X_test = dummyProcess(resized_image)
+	print("reshaping")
+	reshaped=X_test.reshape(1, -1)
+	print("Predicting...")
+	y_pred = clf.predict(reshaped)
+	print(type(y_pred))
+	output = "Result : "
+	for result in y_pred:
+		print("Got: " + result)
+		output += result + "; "
 
-	print("Fitting...")
-	clf.fit(X_train, y_train)
-	print("...done")
-	joblib.dump(clf, "gear_model.pkl")
-
-	return "Done"
+	return output
