@@ -12,8 +12,8 @@ def dummyProcess(image):
     # print("Image data is", len(new_d), "x 1")
     return new_d
 
-def loadImagesForSciKit(input_dir, process):
-    all_images = loadImagesRecursive(input_dir, max_per_dir=100)
+def loadImagesForSciKit(input_dir, process, max_per_dir=9999):
+    all_images = loadImagesRecursive(input_dir, max_per_dir=200)
     output_data = []
     classes = []
 
@@ -32,8 +32,10 @@ def loadImagesForSciKit(input_dir, process):
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report
 
-def trainer():
-	d, c = loadImagesForSciKit('../gear_images', dummyProcess)
+def trainer(imageURL, numImages):
+	print("Loading images")
+	d, c = loadImagesForSciKit('../gear_images', dummyProcess, numImages)
+	print("Done")
 
 	num_images = len(d)
 	num_pixels = len(d[0])
@@ -46,17 +48,33 @@ def trainer():
 	from sklearn.ensemble import RandomForestClassifier
 	clf = RandomForestClassifier()
 
+	print("Fitting...")
 	clf.fit(X_train, y_train)
+	print("...done")
 
-	y_pred = clf.predict(X_test)
+	#load Image from URL
+	import urllib
+	from PIL import Image
+	from io import BytesIO
+	print("Loading image from " + imageURL)
+	import urllib.request
+	with urllib.request.urlopen(imageURL) as response:
+		r = response.read()	# img_file = urllib.urlopen(imageURL)
+		im = BytesIO(r)
+		resized_image = sizeImage(Image.open(im), 128, 128)
 
-	# print(y_test)
-	# print(confusion_matrix(y_test, y_pred))
-	output = classification_report(y_test, y_pred) + chr(10) + chr(13)
-	# print(output)
-
-	accuracy = accuracy_score(y_test, y_pred)*100
-	# print("Accuracy: %2.0f%%" % accuracy)
-	output = output + "Accuracy = %2.0f%%" % accuracy
+	print(resized_image.size)
+	data = dummyProcess(resized_image)
+	print(len(data))
+	X_test = dummyProcess(resized_image)
+	print("reshaping")
+	reshaped=X_test.reshape(1, -1)
+	print("Predicting...")
+	y_pred = clf.predict(reshaped)
+	print(type(y_pred))
+	output = "Result : "
+	for result in y_pred:
+		print("Got: " + result)
+		output += result + "; "
 
 	return output
