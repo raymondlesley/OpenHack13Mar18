@@ -12,6 +12,9 @@ def loadSizedImage(filename, size):
     result.paste(img, top_left)
     return result
 
+def loadImage128x128(filename):
+    return loadSizedImage(filename, (128, 128))
+
 def processImage(img):
     # img = ImageOps.equalize(img)
     img = ImageOps.autocontrast(img)
