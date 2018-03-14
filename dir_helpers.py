@@ -31,7 +31,7 @@ def loadImages(directory):
             images.append(f)
     return images
 
-def loadImagesRecursive(directory):
+def loadImagesRecursive(directory, max_per_dir=9999):
     dirs = loadDirs(directory)
     # print(dirs)
     images = []
@@ -39,10 +39,14 @@ def loadImagesRecursive(directory):
     for d in dirs:
         # print("looking in", d)
         if d.is_dir():
+            num_this_dir = 0
             for f in d.iterdir():
                 if (f.is_file()):
                     # print(f, "is a file")
                     images.append(f)
+                    if (num_this_dir >= max_per_dir):
+                        break
+                    num_this_dir += 1
             # print("done with", d)
 
     return images
@@ -50,11 +54,11 @@ def loadImagesRecursive(directory):
 from pathlib import Path
 from image_helpers import *
 
-def processAllImages(input_dir, output_dir, process):
-    all_images = loadImagesRecursive(input_dir)
+def processAllImages(input_dir, output_dir, process, max_per_dir=9999):
+    all_images = loadImagesRecursive(input_dir, max_per_dir)
 
     for image in all_images:
-        #print("from:", image.parent.name + '/' + image.name)
+        # print("from:", image.parent.name + '/' + image.name)
         img = loadImage128x128(image)
         # print("loaded:", img)
         new_img = process(img)
@@ -70,3 +74,16 @@ def processAllImages(input_dir, output_dir, process):
             new_img.save(filename)
         except:
             print("problem with", filename, "(didn't save)")
+
+def loadImagesForSciKit(input_dir, process):
+    all_images = loadImagesRecursive(input_dir)
+    output_data = []
+
+    for image in all_images:
+        print("from:", image.parent.name + '/' + image.name)
+        img = loadImage128x128(image)
+        # print("loaded:", img)
+        image_data = process(img)
+        #filename = output_dir + '/' + str(image_number) + '.jpg'
+        dirname = image.parent.name  # class
+        print("Image class ", dirname)
