@@ -4,6 +4,8 @@ Gets to 99.25% test accuracy after 12 epochs
 16 seconds per epoch on a GRID K520 GPU.
 '''
 
+# from https://github.com/keras-team/keras/blob/master/examples/mnist_cnn.py
+
 from __future__ import print_function
 import keras
 from keras.datasets import mnist
@@ -38,6 +40,10 @@ x_test /= 255
 print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
+print('y_train shape:', y_train.shape)
+print(y_train.shape[0], 'train samples')
+print(y_test.shape[0], 'test samples')
+print("num_classes =", num_classes)
 
 # convert class vectors to binary class matrices
 y_train = keras.utils.to_categorical(y_train, num_classes)
