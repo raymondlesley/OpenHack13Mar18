@@ -16,3 +16,6 @@ CLASSES = [
 def getClassIdx(classname):
     idx = CLASSES.index(classname)
     return idx
+
+def getNumClasses():
+    return len(CLASSES)

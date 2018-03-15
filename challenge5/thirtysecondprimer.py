@@ -28,11 +28,11 @@ from dir_helpers import *
 from image_helpers import *
 import numpy as npy
 
-NUM_IMAGES = 120
+NUM_IMAGES = 80
 IMAGE_WIDTH = 80
 IMAGE_HEIGHT = 80
 IMAGE_SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
-IMAGE_LAYERS = 3
+IMAGE_LAYERS = 1
 
 def dummyProcess(image, layers=3):
     # return image.histogram()
@@ -96,6 +96,10 @@ from sklearn.model_selection import train_test_split
 
 X_train, X_test, y_train, y_test = train_test_split(npy.asarray(d), npy.asarray(class_list), test_size=0.33, random_state=42)
 
+# clear out unused (large) variables
+d = None
+c = None
+
 '''
 # x_train and y_train are Numpy arrays --just like in the Scikit-Learn API.
 model.fit(X_train, y_train, epochs=5, batch_size=32)
@@ -119,7 +123,7 @@ from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 
 batch_size = num_images # 128
-num_classes = 12 # 10
+num_classes = getNumClasses() # 10
 epochs = 30 # 12
 
 # input image dimensions
@@ -144,7 +148,7 @@ print("num_classes =", num_classes)
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-feature_size = (IMAGE_WIDTH//20, IMAGE_HEIGHT//20)  # (3, 3)
+feature_size = (4, 4)  # (IMAGE_WIDTH//20, IMAGE_HEIGHT//20)  # (3, 3)
 
 model = Sequential()
 
