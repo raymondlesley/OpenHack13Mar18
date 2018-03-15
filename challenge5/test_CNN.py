@@ -29,10 +29,10 @@ from image_helpers import *
 import numpy as npy
 
 NUM_IMAGES = 80
-IMAGE_WIDTH = 80
-IMAGE_HEIGHT = 80
+IMAGE_WIDTH = 40
+IMAGE_HEIGHT = 40
 IMAGE_SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
-IMAGE_LAYERS = 1
+IMAGE_LAYERS = 3
 
 def dummyProcess(image, layers=3):
     # return image.histogram()
@@ -148,7 +148,7 @@ print("num_classes =", num_classes)
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-num_epochs = 20
+num_epochs = 30
 # feature_size = (4, 4)  # (IMAGE_WIDTH//20, IMAGE_HEIGHT//20)  # (3, 3)
 feature_dim = 3
 initial_conv_size = 32
