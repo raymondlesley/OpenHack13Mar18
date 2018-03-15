@@ -29,9 +29,10 @@ from image_helpers import *
 import numpy as npy
 
 NUM_IMAGES = 120
-IMAGE_WIDTH = 64
-IMAGE_HEIGHT = 64
+IMAGE_WIDTH = 80
+IMAGE_HEIGHT = 80
 IMAGE_SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
+IMAGE_LAYERS = 3
 
 def dummyProcess(image, layers=3):
     # return image.histogram()
@@ -70,7 +71,7 @@ def loadImagesForKeras(input_dir, process, image_layers=3, max_per_dir=9999):
     return output_data, classes
 
 print("Loading images")
-d, c = loadImagesForKeras('../processed_images', dummyProcess, image_layers=1, max_per_dir=NUM_IMAGES)
+d, c = loadImagesForKeras('../processed_images', dummyProcess, image_layers=IMAGE_LAYERS, max_per_dir=NUM_IMAGES)
 print("Done")
 
 from classes import *
@@ -119,7 +120,7 @@ from keras import backend as K
 
 batch_size = num_images # 128
 num_classes = 12 # 10
-epochs = 12
+epochs = 30 # 12
 
 # input image dimensions
 img_rows, img_cols = IMAGE_HEIGHT, IMAGE_WIDTH # 128, 128
@@ -143,17 +144,40 @@ print("num_classes =", num_classes)
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
+feature_size = (IMAGE_WIDTH//20, IMAGE_HEIGHT//20)  # (3, 3)
+
 model = Sequential()
-model.add(Conv2D(32, kernel_size=(3, 3),
+
+# original layers
+
+model.add(Conv2D(32, feature_size,  # was 32
                  activation='relu',
                  input_shape=input_shape))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+model.add(Conv2D(64, feature_size, activation='relu'))  # was 64
+model.add(MaxPooling2D(pool_size=(2, 2)))  # was (2, 2)
+model.add(Dropout(0.25))  # was 0.25
 model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-model.add(Dropout(0.5))
+model.add(Dense(64, activation='relu'))   # was Dense(128, ...)
+model.add(Dropout(0.25))  # was 0.5
 model.add(Dense(num_classes, activation='softmax'))
+
+'''
+# experiment
+model.add(Conv2D(32, feature_size,
+                 activation='relu',
+                 input_shape=input_shape))
+model.add(Conv2D(64, feature_size, activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))  # was (2, 2)
+
+#model.add(Dropout(0.25))  # was 0.25
+#model.add(Flatten())
+model.add(Conv2D(64, feature_size, activation='relu'))
+model.add(MaxPooling2D(pool_size=(2, 2)))  # was (2, 2)
+
+#model.add(Dense(64, activation='relu'))   # was Dense(128, ...)
+#model.add(Dropout(0.25))  # was 0.5
+model.add(Dense(num_classes, activation='softmax'))
+'''
 
 #model.compile(loss=keras.losses.categorical_crossentropy,
 #              optimizer=keras.optimizers.Adadelta(),  # try "rmsprop"
@@ -168,5 +192,8 @@ model.fit(x_train, y_train,
           verbose=1,
           validation_data=(x_test, y_test))
 score = model.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+loss = score[0]
+accuracy = score[1] * 100.0
+print('Test loss: %2.1f' % loss)
+print('Test accuracy:  %2.1f%%' % accuracy)
+#print(score[1]*100)
