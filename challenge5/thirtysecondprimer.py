@@ -28,27 +28,38 @@ from dir_helpers import *
 from image_helpers import *
 import numpy as npy
 
-NUM_IMAGES = 20
+NUM_IMAGES = 120
+IMAGE_WIDTH = 64
+IMAGE_HEIGHT = 64
+IMAGE_SIZE = (IMAGE_WIDTH, IMAGE_HEIGHT)
 
-def dummyProcess(image):
+def dummyProcess(image, layers=3):
     # return image.histogram()
     d = image.getdata()
     #print("Image data is", len(d), "x", len(d[0]))
     new_d = npy.array(d)
-    new_d = npy.reshape(new_d, [128, 128, 3])
+    new_d = npy.reshape(new_d, [IMAGE_WIDTH, IMAGE_HEIGHT, layers])
     # print("Image data is", len(new_d), "x 1")
+
     return new_d
 
-def loadImagesForKeras(input_dir, process, max_per_dir=9999):
+def loadImagesForKeras(input_dir, process, image_layers=3, max_per_dir=9999):
     all_images = loadImagesRecursive(input_dir, max_per_dir)
     output_data = []
     classes = []
 
     for image in all_images:
         print("from:", image.parent.name + '/' + image.name)
-        img = loadImage128x128(image)
+        if image_layers==1:
+            #img = loadImage128x128(image).convert('L')
+            img = loadSizedImage(image, IMAGE_SIZE).convert('L')
+        elif image_layers==3:
+            #img = loadImage128x128(image)
+            img = loadSizedImage(image, IMAGE_SIZE)
+        else:
+            raise ValueError("unsupported image depth: %d" % image_layers)
         # print("loaded:", img)
-        image_data = process(img)
+        image_data = process(img, image_layers)
         print("data is", image_data.shape)
         #filename = output_dir + '/' + str(image_number) + '.jpg'
         dirname = image.parent.name  # class
@@ -59,7 +70,7 @@ def loadImagesForKeras(input_dir, process, max_per_dir=9999):
     return output_data, classes
 
 print("Loading images")
-d, c = loadImagesForKeras('../processed_images', dummyProcess, NUM_IMAGES)
+d, c = loadImagesForKeras('../processed_images', dummyProcess, image_layers=1, max_per_dir=NUM_IMAGES)
 print("Done")
 
 from classes import *
@@ -111,7 +122,7 @@ num_classes = 12 # 10
 epochs = 12
 
 # input image dimensions
-img_rows, img_cols = 128, 128
+img_rows, img_cols = IMAGE_HEIGHT, IMAGE_WIDTH # 128, 128
 input_shape = X_test[0].shape # (img_rows, img_cols, 1)
 
 x_train = X_train.astype('float32')
@@ -144,8 +155,11 @@ model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 
+#model.compile(loss=keras.losses.categorical_crossentropy,
+#              optimizer=keras.optimizers.Adadelta(),  # try "rmsprop"
+#              metrics=['accuracy'])
 model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer=keras.optimizers.Adadelta(),
+              optimizer="rmsprop",
               metrics=['accuracy'])
 
 model.fit(x_train, y_train,
