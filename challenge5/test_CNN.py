@@ -148,7 +148,7 @@ print("num_classes =", num_classes)
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-num_epochs = 32
+num_epochs = 20
 # feature_size = (4, 4)  # (IMAGE_WIDTH//20, IMAGE_HEIGHT//20)  # (3, 3)
 feature_dim = 3
 initial_conv_size = 32
@@ -160,9 +160,11 @@ dense_size = 64
 import CNN_model
 
 for feature_dim in range(2, 6):
-    accuracy = []
-    # average over iterations
-    for i in range(0,3):
-        accuracy.append(CNN_model.RunCNNmodel(x_train, y_train, x_test, y_test, input_shape, num_images, num_classes, num_epochs, feature_dim, initial_conv_size, second_conv_size, first_dropout, second_dropout, dense_size))
-    accuracy = npy.mean(accuracy)
-    print("feature_size =", feature_dim, "; accuracy:", accuracy)
+    for initial_conv_size in [16, 32, 64]:
+        for second_conv_size in [32, 64, 80]:
+            accuracy = []
+            # average over iterations
+            for i in range(0,3):
+                accuracy.append(CNN_model.RunCNNmodel(x_train, y_train, x_test, y_test, input_shape, num_images, num_classes, num_epochs, feature_dim, initial_conv_size, second_conv_size, first_dropout, second_dropout, dense_size))
+            accuracy = npy.mean(accuracy)
+            print("feature_size =", feature_dim, "; initial_conv_size =", initial_conv_size, "; second_conv_size =", second_conv_size, "; accuracy:", accuracy)
