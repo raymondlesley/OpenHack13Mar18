@@ -1,4 +1,6 @@
-from testapp import app
+#from testapp import app
+from flask import Flask
+app = Flask(__name__)
 
 global_data = ""
 
@@ -48,3 +50,6 @@ def classify():
 	print("imageURL=" + imageURL)
 	output = classifier.classifier(imageURL)
 	return output
+
+if __name__ == '__main__':
+	app.run()
